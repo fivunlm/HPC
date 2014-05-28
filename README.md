@@ -1,4 +1,6 @@
 HPC
 ===
 
-Sistemas Operativos Avanzados TPN2
+Trabajo Practico Nº2
+
+Catedra: Sistemas Operativos Avanzados Año: 2014
