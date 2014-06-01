@@ -1,0 +1,10 @@
+gcc -o $1 $1.c -O3
+
+# Aqui deben ir los comandos que compartan el programa compilado al resto de los hosts
+# o bien, copiarlo a una carpeta compartida entre todos los hosts.
+# Si no se comparte la misma version del código a todos los hosts indicados en mpi_hosts
+# MPI devolvera un mensaje de error.
+# El path al ejecutable debe ser el mismo para todos los hosts (por ejemplo, /home/user1/programa)
+
+# Debe crearse el archivo mpi_hosts con los nodos (IP o hostname) y la cantidad de tareas por nodo a utilizar por cada uno
+mpirun -machinefile mpi_hosts  $1 $2
