@@ -1,6 +1,8 @@
 #/bin/bash
 
-dimensions=(128 512 1024)
+export OMP_NUM_THREADS = 4
+
+dimensions=(128 256 512 1024 2048)
 
 for (( i = 0 ; i < ${#dimensions[@]} ; i++ )) do
 	echo '------------------------------------------------------------'
