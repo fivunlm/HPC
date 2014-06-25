@@ -16,7 +16,7 @@ double dwalltime();
 main(int argc, char *argv[])
 {
   float *A, *B, *C;
-  int n, i, j,k;
+  int n, i, j, k;
   double timetick;
 
   /* Chequeando parametros */
@@ -48,7 +48,7 @@ main(int argc, char *argv[])
     {
       for (k = 0; k < n; ++k)
       {
-        C[i*n +j] +=  A[i*n +k]*B[k*n +j];  
+        C[i*n + j] += A[i*n + k] * B[k*n + j];  
       }
     }
   }

@@ -42,7 +42,6 @@ main(int argc, char *argv[])
   /* Programar aqui el algoritmo de multiplicacion de matrices */
   /*************************************************************/
   
-  #pragma omp parallel for private(i,j,k,iPORn,inMASj)
   for (i = 0; i < n; i++)
   {
     iPORn=i*n;
@@ -55,7 +54,7 @@ main(int argc, char *argv[])
       }
     }
   }
-
+  
   /*************************************************************/
   
   timetick = dwalltime() - timetick;
