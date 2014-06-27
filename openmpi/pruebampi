@@ -1,0 +1,2 @@
+mpicc -o $1 $1.c -lm -O3
+mpirun -machinefile maquinas $1 $2
