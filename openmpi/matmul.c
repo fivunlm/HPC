@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h> 
 #include <sys/time.h>
+#include <math.h>
 #include <mpi.h>
 
 void initvalmat(float *mat, int n, float val); 
@@ -14,6 +15,7 @@ void verify_result(float *c, int n);
 double dwalltime();
 float matrix_get_cell(float *matrix,int n, int x, int y);
 int matrix_set_cell(float *matrix,int n, int x, int y, float val);
+void printMatrix(float * M, int n);
 
 main(int argc, char *argv[])
 	{
@@ -36,7 +38,7 @@ main(int argc, char *argv[])
 
 	MPI_Comm_size(MPI_COMM_WORLD, &count);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
+	//printf("rank: %d\n", rank);
 	/* Chequeando parametros */
 	if ((argc != 2) || ((n = atoi(argv[1])) <= 0) )
 		{
@@ -57,6 +59,7 @@ de 0, esta es la sección donde el proceso padre
 realiza su trabajo */
 if (rank == 0) 
 	{
+	//printf("rank: %d Soy rank 0\n", rank);
 	/*Determinar el momento de inicio de ejecución,
 	aquí medimos cuando comenzamos realmente a
 	hacer los cálculos */
@@ -77,14 +80,15 @@ if (rank == 0)
 
 	// esperar a tener todos los resultados completos
 	while (completerows < n) 
-		{
+	{
 		/* Esta llamada espera a recibir un renglón
 		ya resuelto, de cualquier proceso
 		hijo. Nótese el parametro MPI_ANY_SOURCE
 		que indica que se admiten valores de
 		cualquier proceso. */
 		MPI_Recv(resultrow,n + 1,MPI_INT,MPI_ANY_SOURCE,1, MPI_COMM_WORLD, &status);
-		//printf("recibido renglon %d de %d\n",resultrow[0], status.MPI_SOURCE);
+		
+		//printf("rank0: recibido renglon %d de %d\n",resultrow[0], status.MPI_SOURCE);
 		completerows++;
 		// Este ciclo "pone" el renglon recibido en mi matriz de resultado
 		for (i = 0; i < n; i++) 
@@ -92,11 +96,11 @@ if (rank == 0)
 			matrix_set_cell(C,n,i,resultrow[0],resultrow[i + 1]);
 			}
 		}
-	// terminamos el cálculo! anotar tiempo al terminar..
-	timetick2 = MPI_Wtime();
-
-	verify_result(C, n);
-	printf("Resultado correcto. Tiempo de ejecucion: %f segundos\n", (timetick2 - timetick1) );
+		// terminamos el cálculo! anotar tiempo al terminar..
+		timetick2 = MPI_Wtime();
+		//printMatrix(C,n);
+		verify_result(C, n);
+		printf("Resultado correcto. Tiempo de ejecucion: %f segundos\n", (timetick2 - timetick1) );
 	} // AQUI termina la ejecucion del proceso padre
 else 
 	{
@@ -113,10 +117,12 @@ else
 	primer renglon que tiene que resolver este
 	proceso, y el ultimo renglon.  */
 	partitions = count - 1;
-	rowstodo = (float) (n / partitions);
+	rowstodo = ceil ((float)n / partitions);
 	firstrow = rowstodo * (rank - 1);
 	lastrow = firstrow + rowstodo - 1;
+	lastrow = lastrow <= n ? lastrow : n ;	
 
+	//printf("rank-%d: partitions: %d, rowstodo: %d %.2f, firstrow: %d, lastrow: %d\n", rank, partitions, rowstodo, firstrow, lastrow);
 	// asignar un row temporal
 	resultrow = malloc((n + 1) * sizeof(float));
 
@@ -157,6 +163,23 @@ else
 
 // Funciones Auxiliares
 
+void printMatrix(float * M, int n)
+{
+  int i, j, k, iPORn, inMASj;
+
+  for (i = 0; i < n; i++)
+  {
+    iPORn=i*n;
+    printf("| ");
+    for (j = 0; j < n; j++)
+    {
+      printf("%.2f ", M[iPORn+j]);
+    }
+    printf(" |\n");
+  }  
+}
+
+
 /* Init square matrix with a specific value */
 void initvalmat(float *mat, int n, float val)
 	{
@@ -191,7 +214,6 @@ void verify_result(float *c, int n)
 			if (c[i*n + j] != n)
 				{
 				printf("Error en %d, %d, valor: %f\n", i, j, c[i*n + j]);
-				exit(-1);
 				}
 			}
 		}
