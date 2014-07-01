@@ -20,11 +20,6 @@ void verify_result(float *c, int n);
 double dwalltime();
 void printMatrix(float * M, int n);
 
-void Blocked_mat_mult(void);
-void Zero_C(int i_bar, int j_bar);
-void Mult_add(int i_bar, int j_bar, int k_bar);
-
-
 main(int argc, char *argv[])
 {
   double timetick;
@@ -55,7 +50,31 @@ main(int argc, char *argv[])
   /* Programar aqui el algoritmo de multiplicacion de matrices */
   /*************************************************************/
   
-  Blocked_mat_mult();
+  int i_bar, j_bar, k_bar;  // index block rows and columns
+  float *c_p = C_p;
+  float *a_p = A + (i_bar*n_bar + k_bar)*b_sqr;
+  float *b_p = B + (k_bar*n_bar + j_bar)*b_sqr;
+  int i, j, k;
+
+   for (i_bar = 0; i_bar < n_bar; i_bar++)
+      for (j_bar = 0; j_bar < n_bar; j_bar++) {
+         
+        C_p = C + (i_bar*n_bar + j_bar)*b_sqr;
+        memset(C_p, 0, b_sqr*sizeof(float));
+        
+        for (k_bar = 0; k_bar < n_bar; k_bar++) {
+          c_p = C_p;
+          a_p = A + (i_bar*n_bar + k_bar)*b_sqr;
+          b_p = B + (k_bar*n_bar + j_bar)*b_sqr;
+          
+          for (i = 0; i < b; i++)
+            for (j = 0; j < b; j++) 
+              for (k = 0; k < b; k++)
+                  *(c_p + i*b + j) += 
+                       (*(a_p + i*b+k))*(*(b_p + k*b + j));
+        }
+            
+      }
   
   /*************************************************************/
   
@@ -63,36 +82,6 @@ main(int argc, char *argv[])
   verify_result(C, n);
 
   printf("Resultado correcto. Tiempo de ejecucion: %f segundos\n", timetick);
-}
-
-void Zero_C(int i_bar, int j_bar) {
-   C_p = C + (i_bar*n_bar + j_bar)*b_sqr;
-
-   memset(C_p, 0, b_sqr*sizeof(float));
-}
-
-void Blocked_mat_mult(void){
-   int i_bar, j_bar, k_bar;  // index block rows and columns
-
-   for (i_bar = 0; i_bar < n_bar; i_bar++)
-      for (j_bar = 0; j_bar < n_bar; j_bar++) {
-         Zero_C(i_bar, j_bar);
-         for (k_bar = 0; k_bar < n_bar; k_bar++) 
-            Mult_add(i_bar, j_bar, k_bar);
-      }
-}
-
-void Mult_add(int i_bar, int j_bar, int k_bar) {
-   float *c_p = C_p;
-   float *a_p = A + (i_bar*n_bar + k_bar)*b_sqr;
-   float *b_p = B + (k_bar*n_bar + j_bar)*b_sqr;
-   int i, j, k;
-
-   for (i = 0; i < b; i++)
-      for (j = 0; j < b; j++) 
-         for (k = 0; k < b; k++)
-            *(c_p + i*b + j) += 
-               (*(a_p + i*b+k))*(*(b_p + k*b + j));
 }
 
 void printMatrix(float * M, int n)
